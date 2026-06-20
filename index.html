@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spark · Mod Watch</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#15171a">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+
+:root{
+  --bg:#15171a;
+  --surface:#1c1f24;
+  --surface-2:#23272d;
+  --border:#33383f;
+  --ember:#ff6a2b;
+  --ember-dim:#5a3220;
+  --glow:#ffd23f;
+  --glow-dim:#564a1c;
+  --text:#eceae4;
+  --muted:#8b9099;
+  --faint:#5d636c;
+  --ok:#5fd99a;
+  --modrinth:#1bd96a;
+  --curseforge:#f16436;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 28px 80px;}
+
+/* header */
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:.14em;
+  color:var(--ember);
+  text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;background:var(--ember);
+  box-shadow:0 0 0 0 rgba(255,106,43,.6);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(255,106,43,.55);}
+  70%{box-shadow:0 0 0 7px rgba(255,106,43,0);}
+  100%{box-shadow:0 0 0 0 rgba(255,106,43,0);}
+}
+.dot.paused{background:var(--faint);animation:none;box-shadow:none;}
+h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:34px;
+  font-weight:700;
+  margin:6px 0 2px;
+  letter-spacing:-.01em;
+}
+.sub{color:var(--muted);font-size:14px;margin:0 0 22px;}
+.status-row{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  font-size:13px;color:var(--muted);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:14px 0;margin-bottom:28px;
+}
+.status-row b{color:var(--text);font-weight:600;}
+.btn{
+  font-family:'Inter',sans-serif;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:8px 14px;
+  border-radius:7px;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:.15s;
+}
+.btn:hover{border-color:var(--ember);}
+.btn.primary{background:var(--ember);border-color:var(--ember);color:#1a0c04;font-weight:600;}
+.btn.primary:hover{background:#ff7c45;}
+.btn.ghost{background:transparent;}
+.btn.small{padding:5px 10px;font-size:12px;}
+.btn:disabled{opacity:.45;cursor:default;}
+
+/* layout */
+.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:24px;align-items:start;}
+@media (max-width:880px){.grid{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px 20px 22px;
+}
+.panel h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:16px;font-weight:700;margin:0 0 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel h2 span.count{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  background:var(--surface-2);padding:3px 8px;border-radius:5px;font-weight:500;
+}
+
+/* form */
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;font-weight:500;}
+input[type=text],select{
+  width:100%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:9px 10px;
+  border-radius:7px;
+  font-size:13px;
+  font-family:'Inter',sans-serif;
+  outline:none;
+}
+input[type=text]:focus,select:focus{border-color:var(--ember);}
+.field{margin-bottom:14px;}
+
+.chip-input{
+  display:flex;flex-wrap:wrap;gap:6px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:7px;
+  padding:8px;min-height:42px;align-items:center;
+}
+.chip-input input{flex:1;min-width:90px;background:none;border:none;color:var(--text);font-size:13px;outline:none;padding:3px;}
+.chip{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:4px 6px 4px 8px;
+  display:flex;align-items:center;gap:6px;
+  color:var(--glow);
+}
+.chip i{
+  font-style:normal;cursor:pointer;color:var(--faint);font-size:13px;line-height:1;
+}
+.chip i:hover{color:var(--ember);}
+
+.seg{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;width:fit-content;}
+.seg button{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;
+  background:var(--surface-2);color:var(--muted);border:none;padding:7px 14px;cursor:pointer;
+}
+.seg button.active{background:var(--ember-dim);color:var(--ember);}
+.seg button:not(:last-child){border-right:1px solid var(--border);}
+
+.src-toggle{display:flex;gap:14px;font-size:12.5px;color:var(--muted);}
+.src-toggle label{display:flex;align-items:center;gap:6px;font-weight:400;margin:0;cursor:pointer;}
+.src-toggle input{width:14px;height:14px;accent-color:var(--ember);}
+
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* group cards */
+.group-card{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:10px;
+  background:var(--surface-2);
+}
+.group-card.inactive{opacity:.5;}
+.group-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.group-name{font-weight:600;font-size:13.5px;}
+.group-mode{
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--glow);
+  background:var(--glow-dim);padding:2px 6px;border-radius:4px;margin-left:8px;
+}
+.group-kw{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.kw-pill{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);padding:3px 7px;border-radius:4px;
+}
+.group-foot{display:flex;align-items:center;justify-content:space-between;}
+.group-srcs{font-size:11px;color:var(--faint);}
+.group-actions{display:flex;gap:6px;}
+
+/* alerts */
+.empty{
+  text-align:center;color:var(--faint);font-size:13px;padding:38px 10px;
+  border:1px dashed var(--border);border-radius:9px;
+}
+.alert{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:10px;
+  background:var(--surface-2);display:flex;gap:12px;
+}
+.alert:hover{border-color:var(--faint);}
+.alert-icon{
+  width:34px;height:34px;border-radius:7px;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--ember);
+  border:1px solid var(--border);
+}
+.alert-body{flex:1;min-width:0;}
+.alert-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
+.alert-title{font-weight:600;font-size:13.5px;}
+.alert-title a{color:var(--text);text-decoration:none;}
+.alert-title a:hover{color:var(--ember);}
+.badge{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;
+  padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;
+}
+.badge.modrinth{background:#0d3a22;color:var(--modrinth);}
+.badge.curseforge{background:#4a2213;color:var(--curseforge);}
+.alert-desc{font-size:12.5px;color:var(--muted);margin:0 0 6px;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.alert-meta{font-size:11px;color:var(--faint);display:flex;gap:10px;flex-wrap:wrap;}
+.alert-meta .match{color:var(--glow);}
+.dismiss{
+  background:none;border:none;color:var(--faint);cursor:pointer;font-size:16px;
+  align-self:flex-start;padding:2px 4px;line-height:1;
+}
+.dismiss:hover{color:var(--ember);}
+
+.cf-note{
+  font-size:11.5px;color:var(--faint);background:var(--surface-2);border:1px solid var(--border);
+  border-radius:7px;padding:9px 11px;margin-top:12px;line-height:1.5;
+}
+.cf-note b{color:var(--muted);}
+
+footer.brand{
+  text-align:center;color:var(--faint);font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.08em;margin-top:46px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="dot" id="liveDot"></span>SPARK MOD DIVISION</div>
+  <h1>Mod Watch</h1>
+  <p class="sub">Tell it what to look for. It checks Modrinth (live) and CurseForge (if reachable) and lists what matches.</p>
+
+  <div class="status-row">
+    <span>Status: <b id="statusText">starting…</b></span>
+    <span>Last checked: <b id="lastChecked">never</b></span>
+    <span>New matches: <b id="newCount">0</b></span>
+    <span style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+      <label style="margin:0;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:12px;color:var(--muted);">Check every</span>
+        <select id="pollInterval" style="width:auto;padding:6px 8px;"></select>
+      </label>
+      <button class="btn" id="checkNowBtn">Check now</button>
+    </span>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: groups -->
+    <div>
+      <div class="panel">
+        <h2>New watch group</h2>
+        <div class="field">
+          <label for="gName">Name</label>
+          <input type="text" id="gName" placeholder="e.g. Tech / storage mods">
+        </div>
+        <div class="field">
+          <label for="gKwInput">Keywords (press Enter to add each one)</label>
+          <div class="chip-input" id="chipBox">
+            <input type="text" id="gKwInput" placeholder="type a keyword…">
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Match logic</label>
+            <div class="seg" id="modeSeg">
+              <button data-mode="OR" class="active">match ANY</button>
+              <button data-mode="AND">match ALL</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Sources</label>
+            <div class="src-toggle">
+              <label><input type="checkbox" id="srcModrinth" checked> Modrinth</label>
+              <label><input type="checkbox" id="srcCurseforge" checked> CurseForge</label>
+            </div>
+          </div>
+        </div>
+        <button class="btn primary" id="addGroupBtn" style="width:100%;margin-top:4px;">Add watch group</button>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <h2>Your watch groups <span class="count" id="groupCount">0</span></h2>
+        <div id="groupList"></div>
+        <div class="cf-note">
+          <b>About CurseForge:</b> its API requires a server-side key and most browsers block the request directly from a page like this one (CORS). Modrinth matches will always come through live; CurseForge groups will show as unavailable unless your browser/network allows it.
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: alerts -->
+    <div>
+      <div class="panel">
+        <h2>Matches <span class="count" id="alertCount">0</span></h2>
+        <div id="alertList"><div class="empty">No matches yet. Add a watch group and hit "Check now".</div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="brand">SPARK — MINECRAFT MODDING</footer>
+</div>
+
+<script>
+const SHARED = false;
+
+const state = {
+  groups: [],
+  alerts: [],
+  seenIds: [],
+  settings: { pollMinutes: 5 },
+  chips: []
+};
+
+async function load(){
+  try{ const r = await window.storage.get('groups', SHARED); state.groups = JSON.parse(r.value); }catch(e){ state.groups = []; }
+  try{ const r = await window.storage.get('alerts', SHARED); state.alerts = JSON.parse(r.value); }catch(e){ state.alerts = []; }
+  try{ const r = await window.storage.get('seenIds', SHARED); state.seenIds = JSON.parse(r.value); }catch(e){ state.seenIds = []; }
+  try{ const r = await window.storage.get('settings', SHARED); state.settings = JSON.parse(r.value); }catch(e){ state.settings = { pollMinutes: 5 }; }
+}
+async function saveGroups(){ try{ await window.storage.set('groups', JSON.stringify(state.groups), SHARED); }catch(e){} }
+async function saveAlerts(){ try{ await window.storage.set('alerts', JSON.stringify(state.alerts.slice(0,200)), SHARED); }catch(e){} }
+async function saveSeen(){ try{ await window.storage.set('seenIds', JSON.stringify(state.seenIds.slice(-800)), SHARED); }catch(e){} }
+async function saveSettings(){ try{ await window.storage.set('settings', JSON.stringify(state.settings), SHARED); }catch(e){} }
+
+/* ---------- chip input ---------- */
+const chipBox = document.getElementById('chipBox');
+const gKwInput = document.getElementById('gKwInput');
+function renderChips(){
+  chipBox.querySelectorAll('.chip').forEach(c=>c.remove());
+  state.chips.forEach((kw,i)=>{
+    const c = document.createElement('span');
+    c.className='chip';
+    c.innerHTML = kw + ' <i data-i="'+i+'">×</i>';
+    chipBox.insertBefore(c, gKwInput);
+  });
+}
+chipBox.addEventListener('click', e=>{
+  if(e.target.tagName==='I'){ state.chips.splice(+e.target.dataset.i,1); renderChips(); }
+});
+gKwInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && gKwInput.value.trim()){
+    e.preventDefault();
+    state.chips.push(gKwInput.value.trim());
+    gKwInput.value='';
+    renderChips();
+  }
+});
+
+/* ---------- mode segmented control ---------- */
+let currentMode = 'OR';
+document.getElementById('modeSeg').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  currentMode = e.target.dataset.mode;
+});
+
+/* ---------- add group ---------- */
+document.getElementById('addGroupBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('gName').value.trim();
+  if(!name || state.chips.length===0){ alert('Give it a name and at least one keyword.'); return; }
+  const group = {
+    id: 'g'+Date.now(),
+    name,
+    keywords: [...state.chips],
+    mode: currentMode,
+    sources: {
+      modrinth: document.getElementById('srcModrinth').checked,
+      curseforge: document.getElementById('srcCurseforge').checked
+    },
+    active: true
+  };
+  state.groups.unshift(group);
+  await saveGroups();
+  document.getElementById('gName').value='';
+  state.chips=[]; renderChips();
+  renderGroups();
+  pollNow();
+});
+
+/* ---------- render groups ---------- */
+function renderGroups(){
+  const list = document.getElementById('groupList');
+  document.getElementById('groupCount').textContent = state.groups.length;
+  if(state.groups.length===0){ list.innerHTML = '<div class="empty">No watch groups yet.</div>'; return; }
+  list.innerHTML = state.groups.map(g=>{
+    const srcs = [g.sources.modrinth?'Modrinth':null, g.sources.curseforge?'CurseForge':null].filter(Boolean).join(' + ');
+    return '<div class="group-card '+(g.active?'':'inactive')+'" data-id="'+g.id+'">'
+      +'<div class="group-head">'
+        +'<div><span class="group-name">'+escapeHtml(g.name)+'</span><span class="group-mode">'+g.mode+'</span></div>'
+        +'<div class="group-actions">'
+          +'<button class="btn small toggle-btn">'+(g.active?'Pause':'Resume')+'</button>'
+          +'<button class="btn small del-btn">Delete</button>'
+        +'</div>'
+      +'</div>'
+      +'<div class="group-kw">'+g.keywords.map(k=>'<span class="kw-pill">'+escapeHtml(k)+'</span>').join('')+'</div>'
+      +'<div class="group-foot"><span class="group-srcs">'+srcs+'</span></div>'
+    +'</div>';
+  }).join('');
+
+  list.querySelectorAll('.toggle-btn').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      const id = e.target.closest('.group-card').dataset.id;
+      const g = state.groups.find(x=>x.id===id);
+      g.active = !g.active;
+      await saveGroups(); renderGroups();
+    });
+  });
+  list.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      const id = e.target.closest('.group-card').dataset.id;
+      state.groups = state.groups.filter(x=>x.id!==id);
+      await saveGroups(); renderGroups();
+    });
+  });
+}
+
+/* ---------- render alerts ---------- */
+function renderAlerts(){
+  const list = document.getElementById('alertList');
+  document.getElementById('alertCount').textContent = state.alerts.length;
+  if(state.alerts.length===0){ list.innerHTML = '<div class="empty">No matches yet. Add a watch group and hit "Check now".</div>'; return; }
+  list.innerHTML = state.alerts.map(a=>{
+    const initials = a.name.split(/\\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+    return '<div class="alert" data-id="'+a.uid+'">'
+      +'<div class="alert-icon">'+escapeHtml(initials)+'</div>'
+      +'<div class="alert-body">'
+        +'<div class="alert-top">'
+          +'<span class="alert-title"><a href="'+a.url+'" target="_blank" rel="noopener">'+escapeHtml(a.name)+'</a></span>'
+          +'<span class="badge '+a.source+'">'+a.source+'</span>'
+        +'</div>'
+        +'<p class="alert-desc">'+escapeHtml(a.desc||'')+'</p>'
+        +'<div class="alert-meta"><span class="match">matched: '+escapeHtml(a.groupName)+'</span><span>'+timeAgo(a.found)+'</span></div>'
+      +'</div>'
+      +'<button class="dismiss" title="Dismiss">×</button>'
+    +'</div>';
+  }).join('');
+  list.querySelectorAll('.dismiss').forEach(btn=>{
+    btn.addEventListener('click', async e=>{
+      const uid = e.target.closest('.alert').dataset.id;
+      state.alerts = state.alerts.filter(x=>x.uid!==uid);
+      await saveAlerts(); renderAlerts();
+    });
+  });
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function timeAgo(ts){
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return s+'s ago';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+function matches(text, group){
+  const t = text.toLowerCase();
+  const kws = group.keywords.map(k=>k.toLowerCase());
+  return group.mode==='AND' ? kws.every(k=>t.includes(k)) : kws.some(k=>t.includes(k));
+}
+
+/* ---------- polling ---------- */
+let curseforgeReachable = null;
+
+async function pollModrinth(){
+  const wantModrinth = state.groups.some(g=>g.active && g.sources.modrinth);
+  if(!wantModrinth) return [];
+  try{
+    const res = await fetch('https://api.modrinth.com/v2/search?limit=50&index=newest&facets=' + encodeURIComponent('[["project_type:mod"]]'));
+    if(!res.ok) throw new Error('bad status');
+    const data = await res.json();
+    return (data.hits||[]).map(h=>({
+      source:'modrinth',
+      id:h.project_id || h.slug,
+      name:h.title,
+      desc:h.description,
+      categories:h.categories||[],
+      url:'https://modrinth.com/mod/'+h.slug,
+      created:h.date_created
+    }));
+  }catch(e){
+    return [];
+  }
+}
+
+async function pollCurseforge(){
+  const wantCF = state.groups.some(g=>g.active && g.sources.curseforge);
+  if(!wantCF) return { items: [], reachable:false };
+  try{
+    const res = await fetch('https://api.curseforge.com/v1/mods/search?gameId=432&sortField=11&sortOrder=desc&pageSize=50', {
+      headers: { 'Accept':'application/json' }
+    });
+    if(!res.ok) throw new Error('blocked');
+    const data = await res.json();
+    return {
+      reachable:true,
+      items:(data.data||[]).map(m=>({
+        source:'curseforge',
+        id:String(m.id),
+        name:m.name,
+        desc:m.summary,
+        categories:(m.categories||[]).map(c=>c.name),
+        url:m.links && m.links.websiteUrl,
+        created:m.dateCreated
+      }))
+    };
+  }catch(e){
+    return { items: [], reachable:false };
+  }
+}
+
+async function pollNow(){
+  document.getElementById('statusText').textContent = 'checking…';
+  document.getElementById('liveDot').classList.remove('paused');
+
+  const [modrinthItems, cf] = await Promise.all([pollModrinth(), pollCurseforge()]);
+  curseforgeReachable = cf.reachable;
+  const allItems = [...modrinthItems, ...cf.items];
+
+  let newMatches = 0;
+  for(const item of allItems){
+    const uidKey = item.source+':'+item.id;
+    if(state.seenIds.includes(uidKey)) continue;
+    state.seenIds.push(uidKey);
+
+    const haystack = [item.name, item.desc, (item.categories||[]).join(' ')].join(' ');
+    for(const g of state.groups){
+      if(!g.active) continue;
+      if(item.source==='modrinth' && !g.sources.modrinth) continue;
+      if(item.source==='curseforge' && !g.sources.curseforge) continue;
+      if(matches(haystack, g)){
+        state.alerts.unshift({
+          uid: uidKey+':'+g.id+':'+Date.now(),
+          source:item.source, name:item.name, desc:item.desc,
+          url:item.url, groupName:g.name, found:Date.now()
+        });
+        newMatches++;
+      }
+    }
+  }
+  if(newMatches>0){
+    await saveAlerts();
+    document.getElementById('newCount').textContent = newMatches;
+  }
+  await saveSeen();
+  renderAlerts();
+
+  document.getElementById('lastChecked').textContent = new Date().toLocaleTimeString();
+  document.getElementById('statusText').textContent = 'watching live';
+}
+
+/* ---------- poll interval control ---------- */
+const pollSelect = document.getElementById('pollInterval');
+[1,2,5,10,15,30].forEach(m=>{
+  const o = document.createElement('option');
+  o.value = m; o.textContent = m+' min';
+  pollSelect.appendChild(o);
+});
+let pollTimer = null;
+function setupPolling(){
+  pollSelect.value = state.settings.pollMinutes || 5;
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(pollNow, (state.settings.pollMinutes||5)*60*1000);
+}
+pollSelect.addEventListener('change', async ()=>{
+  state.settings.pollMinutes = +pollSelect.value;
+  await saveSettings();
+  setupPolling();
+});
+document.getElementById('checkNowBtn').addEventListener('click', pollNow);
+
+/* ---------- PWA service worker ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+/* ---------- init ---------- */
+(async function init(){
+  await load();
+  renderChips();
+  renderGroups();
+  renderAlerts();
+  setupPolling();
+  document.getElementById('statusText').textContent = 'watching live';
+  await pollNow();
+})();
+</script>
+</body>
+</html>
