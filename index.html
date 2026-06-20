@@ -309,8 +309,6 @@ footer.brand{
 </div>
 
 <script>
-const SHARED = false;
-
 const state = {
   groups: [],
   alerts: [],
@@ -319,16 +317,29 @@ const state = {
   chips: []
 };
 
-async function load(){
-  try{ const r = await window.storage.get('groups', SHARED); state.groups = JSON.parse(r.value); }catch(e){ state.groups = []; }
-  try{ const r = await window.storage.get('alerts', SHARED); state.alerts = JSON.parse(r.value); }catch(e){ state.alerts = []; }
-  try{ const r = await window.storage.get('seenIds', SHARED); state.seenIds = JSON.parse(r.value); }catch(e){ state.seenIds = []; }
-  try{ const r = await window.storage.get('settings', SHARED); state.settings = JSON.parse(r.value); }catch(e){ state.settings = { pollMinutes: 5 }; }
+// Plain localStorage - persists in the real browser this is hosted in,
+// unlike window.storage (which only exists inside Claude's own artifact preview).
+const LS_PREFIX = 'spark-mod-watch:';
+function lsGet(key, fallback){
+  try{
+    const raw = localStorage.getItem(LS_PREFIX+key);
+    return raw===null ? fallback : JSON.parse(raw);
+  }catch(e){ return fallback; }
 }
-async function saveGroups(){ try{ await window.storage.set('groups', JSON.stringify(state.groups), SHARED); }catch(e){} }
-async function saveAlerts(){ try{ await window.storage.set('alerts', JSON.stringify(state.alerts.slice(0,200)), SHARED); }catch(e){} }
-async function saveSeen(){ try{ await window.storage.set('seenIds', JSON.stringify(state.seenIds.slice(-800)), SHARED); }catch(e){} }
-async function saveSettings(){ try{ await window.storage.set('settings', JSON.stringify(state.settings), SHARED); }catch(e){} }
+function lsSet(key, value){
+  try{ localStorage.setItem(LS_PREFIX+key, JSON.stringify(value)); }catch(e){}
+}
+
+async function load(){
+  state.groups = lsGet('groups', []);
+  state.alerts = lsGet('alerts', []);
+  state.seenIds = lsGet('seenIds', []);
+  state.settings = lsGet('settings', { pollMinutes: 5 });
+}
+async function saveGroups(){ lsSet('groups', state.groups); }
+async function saveAlerts(){ lsSet('alerts', state.alerts.slice(0,200)); }
+async function saveSeen(){ lsSet('seenIds', state.seenIds.slice(-800)); }
+async function saveSettings(){ lsSet('settings', state.settings); }
 
 /* ---------- chip input ---------- */
 const chipBox = document.getElementById('chipBox');
